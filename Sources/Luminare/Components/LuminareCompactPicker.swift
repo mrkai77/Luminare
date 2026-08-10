@@ -127,7 +127,7 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
                     }
                 }
             }
-            .frame(minHeight: minHeight, maxHeight: .infinity)
+            .frame(minHeight: minHeight)
         }
 
         struct SegmentedKnob: View {

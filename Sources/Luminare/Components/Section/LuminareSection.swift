@@ -82,7 +82,7 @@ public struct LuminareSection<Header, Content, Footer>: View where Header: View,
             } footer: {
                 wrappedFooter()
             }
-        case let .stacked:
+        case .stacked:
             VStack(alignment: .leading, spacing: 0) {
                 wrappedHeader()
 

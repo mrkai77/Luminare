@@ -10,18 +10,18 @@ import SwiftUI
 // MARK: - Picker Menu (Compose)
 
 public struct LuminarePickerMenu<Label, Option, Item>: View
-where Label: View, Option: View, Item: Hashable {
+    where Label: View, Option: View, Item: Hashable {
     @Environment(\.luminareSectionHorizontalPadding) private var horizontalPadding
-    
+
     // MARK: Fields
-    
+
     @ViewBuilder private var label: () -> Label
     @Binding private var selection: Item
     let items: [Item]
     @ViewBuilder private var itemToView: (Item) -> Option
-    
+
     // MARK: Initializers
-    
+
     public init(
         selection: Binding<Item>,
         items: [Item],
@@ -64,14 +64,14 @@ where Label: View, Option: View, Item: Hashable {
             Text(titleKey)
         }
     }
-    
+
     // MARK: Body
-    
+
     public var body: some View {
         LuminareCompose {
             HStack(spacing: 8) {
                 itemToView(selection)
-                
+
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption2)
                     .padding(4)
@@ -116,4 +116,3 @@ where Label: View, Option: View, Item: Hashable {
     }
     .frame(width: 300)
 }
-

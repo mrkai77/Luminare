@@ -24,11 +24,15 @@ public enum LuminareModalPresentationAlignment: String, Equatable, Hashable,
 }
 
 public struct LuminareModalPresentation: Equatable, Hashable, Codable, Sendable {
-    let target: LuminareModalPresentationTarget
-    let alignment: LuminareModalPresentationAlignment
-    let offset: CGPoint
+    /// The coordinate space used to place the modal.
+    public let target: LuminareModalPresentationTarget
+    /// The alignment used within the target coordinate space.
+    public let alignment: LuminareModalPresentationAlignment
+    /// The offset applied after resolving the target and alignment.
+    public let offset: CGPoint
 
-    init(
+    /// Creates a modal presentation configuration.
+    public init(
         _ alignment: LuminareModalPresentationAlignment = .centered,
         offset: CGPoint = .zero,
         relativeTo target: LuminareModalPresentationTarget = .window

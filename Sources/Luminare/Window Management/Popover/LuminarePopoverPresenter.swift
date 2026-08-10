@@ -285,33 +285,27 @@ public struct LuminarePopoverPresenter<Content: View>: NSViewRepresentable {
     ) -> NSRect {
         let translationAmount: CGFloat = shouldHideAnchor == true ? 4 : 0
         let anchorRect = positioningView.convert(nsView.bounds, from: nsView)
-        let baseRect: NSRect
-
-        if let attachmentAnchor {
-            baseRect = Self.alignedAnchorRect(
+        let baseRect: NSRect = if let attachmentAnchor {
+            Self.alignedAnchorRect(
                 in: anchorRect,
                 attachmentAnchor: attachmentAnchor,
                 preferredEdge: preferredEdge,
                 popoverSize: popoverSize
             )
         } else {
-            baseRect = anchorRect
+            anchorRect
         }
 
-        let translatedRect: NSRect
-
-        switch arrowEdge {
+        return switch arrowEdge {
         case .top:
-            translatedRect = baseRect.offsetBy(dx: 0, dy: translationAmount)
+            baseRect.offsetBy(dx: 0, dy: translationAmount)
         case .leading:
-            translatedRect = baseRect.offsetBy(dx: -translationAmount, dy: 0)
+            baseRect.offsetBy(dx: -translationAmount, dy: 0)
         case .bottom:
-            translatedRect = baseRect.offsetBy(dx: 0, dy: -translationAmount)
+            baseRect.offsetBy(dx: 0, dy: -translationAmount)
         case .trailing:
-            translatedRect = baseRect.offsetBy(dx: translationAmount, dy: 0)
+            baseRect.offsetBy(dx: translationAmount, dy: 0)
         }
-
-        return translatedRect
     }
 
     private static func alignedAnchorRect(

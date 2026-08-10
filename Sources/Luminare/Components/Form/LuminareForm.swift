@@ -18,11 +18,11 @@ public struct LuminareForm<Content>: View where Content: View {
     @Environment(\.luminareFormLayout) private var layout
     @Environment(\.luminareFormSpacing) private var spacing
     @Environment(\.luminareIsInsideModal) private var isInsideModal
-    
+
     @ViewBuilder private var content: () -> Content
-    
+
     @State private var luminareClickedOutside = false
-    
+
     /// Initializes a ``LuminareForm``.
     ///
     /// - Parameters:
@@ -32,7 +32,6 @@ public struct LuminareForm<Content>: View where Content: View {
     ) {
         self.content = content
     }
-
 
     public var body: some View {
         Group {
@@ -47,7 +46,7 @@ public struct LuminareForm<Content>: View where Content: View {
                     .formStyle(.luminare)
                     .clipped()
                 }
-            case let .stacked:
+            case .stacked:
                 AutoScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: spacing) {
                         content()
@@ -61,8 +60,7 @@ public struct LuminareForm<Content>: View where Content: View {
         .environment(\.luminareClickedOutside, luminareClickedOutside)
         .background(content: clickedOutsideObserver)
     }
-    
-    
+
     private func clickedOutsideObserver() -> some View {
         Color.white.opacity(0.0001)
             .onTapGesture {

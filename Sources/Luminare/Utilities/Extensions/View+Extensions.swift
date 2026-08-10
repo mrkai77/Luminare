@@ -266,7 +266,7 @@ public extension View {
     }
 
     // MARK: Form
-    
+
     func luminareFormSpacing(_ spacing: CGFloat) -> some View {
         environment(\.luminareFormSpacing, spacing)
     }
@@ -400,8 +400,13 @@ public extension View {
 
     // MARK: Sidebar
 
-    func luminareSizebarOverflow(_ overflow: CGFloat) -> some View {
+    func luminareSidebarOverflow(_ overflow: CGFloat) -> some View {
         environment(\.luminareSidebarOverflow, overflow)
+    }
+
+    @available(*, deprecated, renamed: "luminareSidebarOverflow(_:)")
+    func luminareSizebarOverflow(_ overflow: CGFloat) -> some View {
+        luminareSidebarOverflow(overflow)
     }
 
     // MARK: Slider

@@ -218,7 +218,7 @@ public struct LuminareList<ContentA, ContentB, V, ID>: View
                 0x74, // page up
                 0x79, // page down
                 0x73, // home
-                0x77  // end
+                0x77 // end
             ]
 
             guard selectionKeyCodes.contains(event.keyCode) else {
@@ -304,39 +304,39 @@ public struct LuminareListItem<Content, V>: View
                 .environment(\.luminareItemBeingHovered, isHovering)
                 .foregroundStyle(isEnabled ? .primary : .secondary)
         }
-            .frame(height: itemHeight)
-            .contentShape(Rectangle())
-            .tag(itemValue)
-            .background {
-                if hasDividers, !isLast {
-                    VStack {
-                        Spacer()
+        .frame(height: itemHeight)
+        .contentShape(Rectangle())
+        .tag(itemValue)
+        .background {
+            if hasDividers, !isLast {
+                VStack {
+                    Spacer()
 
-                        Divider()
-                    }
-                    .padding(.trailing, -1)
+                    Divider()
                 }
+                .padding(.trailing, -1)
+            }
 
-                if isEnabled {
-                    ZStack {
-                        itemBorder()
-                            .animation(animateSelection ? animationFast : nil, value: isInSelection)
+            if isEnabled {
+                ZStack {
+                    itemBorder()
+                        .animation(animateSelection ? animationFast : nil, value: isInSelection)
 
-                        itemBackground()
-                    }
-                    .padding(.horizontal, 1)
-                    .padding(.leading, 1) // it's nuanced
+                    itemBackground()
                 }
+                .padding(.horizontal, 1)
+                .padding(.leading, 1) // it's nuanced
             }
-            .onHover { isHovering = $0 }
-            .onChange(of: selection) { _ in
-                guard isEnabled else { return }
-                updateDisplayedSelectionPart()
-            }
-            .onAppear {
-                updateDisplayedSelectionPart()
-                isHovering = false
-            }
+        }
+        .onHover { isHovering = $0 }
+        .onChange(of: selection) { _ in
+            guard isEnabled else { return }
+            updateDisplayedSelectionPart()
+        }
+        .onAppear {
+            updateDisplayedSelectionPart()
+            isHovering = false
+        }
     }
 
     private var isFirst: Bool {
@@ -608,7 +608,7 @@ private struct ListPreview<V>: View where V: Hashable & Comparable {
 
                 Button("Sort") {
                     withAnimation {
-                        items.sort(by: <)
+                        items.sort()
                     }
                 }
                 .disabled(items.isEmpty)
@@ -625,7 +625,7 @@ private struct ListPreview<V>: View where V: Hashable & Comparable {
                 selection: $selection,
                 id: \.self
             ) { value in
-                Text("\(value.wrappedValue)")
+                Text(verbatim: "\(value.wrappedValue)")
                     .contextMenu {
                         Button("Remove") {
                             if selection.isEmpty {

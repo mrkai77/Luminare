@@ -97,37 +97,77 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
         @Namespace private var namespace
 
         var body: some View {
-            HStack(spacing: 4) {
-                ForEach(Array(children.enumerated()), id: \.offset) { index, child in
-                    if let value = child.id(as: V.self) {
-                        let nextValue: V? = if index < children.count - 1 {
-                            children[index + 1].id(as: V.self)
-                        } else {
-                            nil
-                        }
-                        SegmentedKnob(
-                            child: child,
-                            namespace: namespace,
-                            isParentHovering: isHovering,
-                            selection: $selection,
-                            value: value,
-                            index: index,
-                            maxIndex: children.count - 1
-                        )
-                        .foregroundStyle(selection == value ? .primary : .secondary)
-                        .zIndex(1)
+            ProposedHeightLayout(minimumHeight: minHeight) {
+                HStack(spacing: 4) {
+                    ForEach(Array(children.enumerated()), id: \.offset) { index, child in
+                        if let value = child.id(as: V.self) {
+                            let nextValue: V? = if index < children.count - 1 {
+                                children[index + 1].id(as: V.self)
+                            } else {
+                                nil
+                            }
+                            SegmentedKnob(
+                                child: child,
+                                namespace: namespace,
+                                isParentHovering: isHovering,
+                                selection: $selection,
+                                value: value,
+                                index: index,
+                                maxIndex: children.count - 1
+                            )
+                            .foregroundStyle(selection == value ? .primary : .secondary)
+                            .zIndex(1)
 
-                        if hasDividers,
-                           child.id != children.last?.id {
-                            Divider()
-                                .frame(height: minHeight / 2)
-                                .opacity(selection == value || selection == nextValue ? 0 : 1)
-                                .zIndex(0)
+                            if hasDividers,
+                               child.id != children.last?.id {
+                                Divider()
+                                    .frame(height: minHeight / 2)
+                                    .opacity(selection == value || selection == nextValue ? 0 : 1)
+                                    .zIndex(0)
+                            }
                         }
                     }
                 }
             }
-            .frame(minHeight: minHeight)
+        }
+
+        struct ProposedHeightLayout: Layout {
+            let minimumHeight: CGFloat
+
+            func sizeThatFits(
+                proposal: ProposedViewSize,
+                subviews: Subviews,
+                cache _: inout ()
+            ) -> CGSize {
+                guard let subview = subviews.first else {
+                    return .zero
+                }
+
+                let proposedWidth = proposal.width.flatMap { $0.isFinite ? $0 : nil }
+                let proposedHeight = proposal.height.flatMap { $0.isFinite ? $0 : nil }
+                let size = subview.sizeThatFits(.init(
+                    width: proposedWidth,
+                    height: proposedHeight
+                ))
+
+                return .init(
+                    width: proposedWidth ?? size.width,
+                    height: max(minimumHeight, proposedHeight ?? size.height)
+                )
+            }
+
+            func placeSubviews(
+                in bounds: CGRect,
+                proposal _: ProposedViewSize,
+                subviews: Subviews,
+                cache _: inout ()
+            ) {
+                subviews.first?.place(
+                    at: bounds.origin,
+                    anchor: .topLeading,
+                    proposal: .init(bounds.size)
+                )
+            }
         }
 
         struct SegmentedKnob: View {

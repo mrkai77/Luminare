@@ -16,10 +16,6 @@ open class LuminareStyledWindow: NSWindow {
         standardWindowButton(type)
     }
 
-    private lazy var trafficLightButtonSizes: [NSButton: NSSize] = trafficLightButtons.reduce(into: [:]) { sizes, button in
-        sizes[button] = button.frame.size
-    }
-
     private var trafficLightButtonConstraints: [NSLayoutConstraint] = []
     private weak var constrainedContentView: NSView?
 
@@ -63,6 +59,7 @@ open class LuminareStyledWindow: NSWindow {
         }
 
         relocateTrafficLightButtons()
+        restoreTrafficLightButtonSizes()
         refreshTrafficLightTrackingAreas()
     }
 
@@ -100,16 +97,30 @@ open class LuminareStyledWindow: NSWindow {
             }
 
             button.translatesAutoresizingMaskIntoConstraints = false
-            let buttonSize = trafficLightButtonSizes[button] ?? button.frame.size
             trafficLightButtonConstraints.append(contentsOf: [
                 button.topAnchor.constraint(equalTo: contentView.topAnchor, constant: titleBarButtonConfiguration.padding),
-                button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: xPosition),
-                button.widthAnchor.constraint(equalToConstant: buttonSize.width),
-                button.heightAnchor.constraint(equalToConstant: buttonSize.height)
+                button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: xPosition)
             ])
         }
 
         NSLayoutConstraint.activate(trafficLightButtonConstraints)
+    }
+
+    private func restoreTrafficLightButtonSizes() {
+        for button in trafficLightButtons {
+            let frame = button.frame
+            let size = button.intrinsicContentSize
+            let x = if windowTitlebarLayoutDirection == .leftToRight {
+                frame.minX
+            } else {
+                frame.maxX - size.width
+            }
+
+            button.frame = .init(
+                origin: .init(x: x, y: frame.maxY - size.height),
+                size: size
+            )
+        }
     }
 
     private func trafficLightButtonsAreConstrained(to contentView: NSView) -> Bool {

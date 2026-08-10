@@ -18,8 +18,9 @@ struct LuminareStyledWindowTests {
         for type in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
             let button = try #require(window.standardWindowButton(type))
             let transform = try #require(button.layer?.affineTransform())
-            let renderedWidth = button.frame.width * transform.a
-            let renderedHeight = button.frame.height * transform.d
+            let alignmentRect = button.alignmentRect(forFrame: button.frame)
+            let renderedWidth = alignmentRect.width * transform.a
+            let renderedHeight = alignmentRect.height * transform.d
 
             #expect(abs(renderedWidth - renderedHeight) < 0.001)
         }

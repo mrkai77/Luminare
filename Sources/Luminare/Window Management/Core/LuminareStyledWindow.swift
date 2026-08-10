@@ -114,11 +114,10 @@ open class LuminareStyledWindow: NSWindow {
 
     private func scaleTrafficLightButtons() {
         for button in trafficLightButtons {
-            let size = button.bounds.size
-            let intrinsicSize = button.intrinsicContentSize
-            guard size.width > 0, size.height > 0 else {
+            guard let size = trafficLightButtonSizes[button], size.width > 0, size.height > 0 else {
                 continue
             }
+            let intrinsicSize = button.intrinsicContentSize
 
             button.wantsLayer = true
             button.layer?.setAffineTransform(.init(

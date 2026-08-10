@@ -100,6 +100,11 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
             HStack(spacing: 4) {
                 ForEach(Array(children.enumerated()), id: \.offset) { index, child in
                     if let value = child.id(as: V.self) {
+                        let nextValue: V? = if index < children.count - 1 {
+                            children[index + 1].id(as: V.self)
+                        } else {
+                            nil
+                        }
                         SegmentedKnob(
                             child: child,
                             namespace: namespace,
@@ -116,6 +121,7 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
                            child.id != children.last?.id {
                             Divider()
                                 .frame(height: minHeight / 2)
+                                .opacity(selection == value || selection == nextValue ? 0 : 1)
                                 .zIndex(0)
                         }
                     }
@@ -149,7 +155,7 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
                 } label: {
                     child
                         .frame(maxWidth: .infinity, minHeight: minHeight - 8, maxHeight: .infinity)
-                        .padding(.horizontal, 8)
+                        .padding(.horizontal, 12)
                 }
                 .buttonStyle(.borderless)
                 .frame(minHeight: minHeight - 8, maxHeight: .infinity)

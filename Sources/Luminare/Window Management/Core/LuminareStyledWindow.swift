@@ -16,6 +16,10 @@ open class LuminareStyledWindow: NSWindow {
         standardWindowButton(type)
     }
 
+    private lazy var trafficLightButtonSizes: [NSButton: NSSize] = trafficLightButtons.reduce(into: [:]) { sizes, button in
+        sizes[button] = button.frame.size
+    }
+
     private var trafficLightButtonConstraints: [NSLayoutConstraint] = []
     private weak var constrainedContentView: NSView?
 
@@ -59,7 +63,7 @@ open class LuminareStyledWindow: NSWindow {
         }
 
         relocateTrafficLightButtons()
-        restoreTrafficLightButtonSizes()
+        scaleTrafficLightButtons()
         refreshTrafficLightTrackingAreas()
     }
 
@@ -96,30 +100,31 @@ open class LuminareStyledWindow: NSWindow {
                 titleBarButtonConfiguration.padding + (buttonAreaWidth - CGFloat(index) * buttonSpacing)
             }
 
+            let buttonSize = trafficLightButtonSizes[button] ?? button.frame.size
             button.translatesAutoresizingMaskIntoConstraints = false
             trafficLightButtonConstraints.append(contentsOf: [
                 button.topAnchor.constraint(equalTo: contentView.topAnchor, constant: titleBarButtonConfiguration.padding),
-                button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: xPosition)
+                button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: xPosition),
+                button.widthAnchor.constraint(equalToConstant: buttonSize.width),
+                button.heightAnchor.constraint(equalToConstant: buttonSize.height)
             ])
         }
-
         NSLayoutConstraint.activate(trafficLightButtonConstraints)
     }
 
-    private func restoreTrafficLightButtonSizes() {
+    private func scaleTrafficLightButtons() {
         for button in trafficLightButtons {
-            let frame = button.frame
-            let size = button.intrinsicContentSize
-            let x = if windowTitlebarLayoutDirection == .leftToRight {
-                frame.minX
-            } else {
-                frame.maxX - size.width
+            let size = button.bounds.size
+            let intrinsicSize = button.intrinsicContentSize
+            guard size.width > 0, size.height > 0 else {
+                continue
             }
 
-            button.frame = .init(
-                origin: .init(x: x, y: frame.maxY - size.height),
-                size: size
-            )
+            button.wantsLayer = true
+            button.layer?.setAffineTransform(.init(
+                scaleX: intrinsicSize.width / size.width,
+                y: intrinsicSize.height / size.height
+            ))
         }
     }
 

@@ -15,11 +15,12 @@
 @Row {
     @Column(size: 3) {
         ```swift
-        LuminareCompactPicker(selection: $selection, style: .menu) {
+        LuminareCompactPicker(selection: $selection) {
             ForEach(data, id: \.keyPath) { element in
                 // Content
             }
         }
+        .luminareCompactPickerStyle(.menu)
         ```
     }
     
@@ -31,7 +32,7 @@
 @Row {
     @Column(size: 2) {
         ```swift
-        LuminareCompactPicker(selection: $selection, style: .segmented) {
+        LuminareCompactPicker(selection: $selection) {
             ForEach(data, id: \.self) { element in
                 Group {
                     // Content
@@ -39,6 +40,7 @@
                 .id(element)
             }
         }
+        .luminareCompactPickerStyle(.segmented)
         ```
     }
     

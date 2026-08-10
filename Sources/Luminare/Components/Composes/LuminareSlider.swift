@@ -27,6 +27,8 @@ public extension LuminareSliderLayout {
     static var compact: Self { .compact() }
 }
 
+protocol LuminareSliderTickStorage {}
+
 // MARK: - Slider (Compose)
 
 public struct LuminareSlider<Label, Content, V, F>: View
@@ -55,6 +57,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
     private let clampsUpper: Bool, clampsLower: Bool
     private let onEditingChanged: (Bool) -> ()
     private let onEditingCommit: () -> ()
+    private let sliderTickStorage: (any LuminareSliderTickStorage)?
 
     @ViewBuilder private var content: (AnyView) -> Content, label: () -> Label
 
@@ -80,6 +83,34 @@ public struct LuminareSlider<Label, Content, V, F>: View
         @ViewBuilder content: @escaping (AnyView) -> Content,
         @ViewBuilder label: @escaping () -> Label
     ) {
+        self.init(
+            value: value,
+            in: range,
+            step: step,
+            format: format,
+            clampsUpper: clampsUpper,
+            clampsLower: clampsLower,
+            onEditingChanged: onEditingChanged,
+            onEditingCommit: onEditingCommit,
+            sliderTickStorage: nil,
+            content: content,
+            label: label
+        )
+    }
+
+    init(
+        value: Binding<V>,
+        in range: ClosedRange<V>,
+        step: V.Stride?,
+        format: F,
+        clampsUpper: Bool,
+        clampsLower: Bool,
+        onEditingChanged: @escaping (Bool) -> (),
+        onEditingCommit: @escaping () -> (),
+        sliderTickStorage: (any LuminareSliderTickStorage)?,
+        @ViewBuilder content: @escaping (AnyView) -> Content,
+        @ViewBuilder label: @escaping () -> Label
+    ) {
         self._value = value
         self.internalValue = value.wrappedValue
         self.lastValue = value.wrappedValue
@@ -90,7 +121,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
         self.clampsLower = clampsLower
         self.onEditingChanged = onEditingChanged
         self.onEditingCommit = onEditingCommit
-
+        self.sliderTickStorage = sliderTickStorage
         self.content = content
         self.label = label
     }
@@ -344,24 +375,13 @@ public struct LuminareSlider<Label, Content, V, F>: View
             }
         }
 
-        Group {
-            if let step {
-                Slider(
-                    value: binding,
-                    in: range,
-                    step: step
-                ) { isEditing in
-                    handleEditingChanged(isEditing)
-                }
-            } else {
-                Slider(
-                    value: binding,
-                    in: range
-                ) { isEditing in
-                    handleEditingChanged(isEditing)
-                }
-            }
-        }
+        LuminareNativeSlider(
+            value: binding,
+            in: range,
+            step: step,
+            tickStorage: sliderTickStorage,
+            onEditingChanged: handleEditingChanged
+        )
         .onHover { isSliderHovering = $0 }
     }
 

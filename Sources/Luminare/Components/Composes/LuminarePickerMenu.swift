@@ -69,31 +69,35 @@ public struct LuminarePickerMenu<Label, Option, Item>: View
 
     public var body: some View {
         LuminareCompose {
-            HStack(spacing: 8) {
-                itemToView(selection)
-
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption2)
-                    .padding(4)
-                    .luminareSurface()
-                    .luminareCornerRadius(8)
-            }
-            .overlay {
-                Picker("", selection: $selection) {
-                    ForEach(items, id: \.self) { item in
+            Menu {
+                ForEach(items, id: \.self) { item in
+                    Toggle(isOn: Binding(
+                        get: { selection == item },
+                        set: { isSelected in
+                            if isSelected {
+                                selection = item
+                            }
+                        }
+                    )) {
                         itemToView(item)
-                            .tag(item)
                     }
                 }
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .buttonStyle(.borderless)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .contentShape(.rect)
-                .mask {
-                    Color.clear
+            } label: {
+                HStack(spacing: 8) {
+                    itemToView(selection)
+
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2)
+                        .padding(4)
+                        .luminareSurface()
+                        .luminareCornerRadius(8)
                 }
+                .contentShape(.rect)
             }
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            .fixedSize()
         } label: {
             label()
         }

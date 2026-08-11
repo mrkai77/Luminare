@@ -30,6 +30,7 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
     // MARK: Environments
 
     @Environment(\.luminareCompactPickerStyle) private var style
+    @Environment(\.luminareMinHeight) private var minHeight
 
     // MARK: Fields
 
@@ -64,6 +65,9 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
                     .pickerStyle(.menu)
                     .buttonStyle(.borderless)
                     .padding(.trailing, -2)
+                    .frame(minHeight: minHeight)
+                    .luminareSurface(isHovering: isHovering, style: .flat)
+                    .luminareFilledStates(.all)
             case .segmented:
                 UnaryVariadicView(content()) { children in
                     SegmentedVariadic(
@@ -73,9 +77,9 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
                     )
                 }
                 .padding(.horizontal, 4)
+                .luminareSurface(style: .flat)
             }
         }
-        .luminareSurface(style: .flat)
         .onHover { isHovering = $0 }
     }
 
@@ -93,29 +97,76 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
         @Namespace private var namespace
 
         var body: some View {
-            HStack(spacing: 4) {
-                ForEach(Array(children.enumerated()), id: \.offset) { index, child in
-                    if let value = child.id(as: V.self) {
-                        SegmentedKnob(
-                            child: child,
-                            namespace: namespace,
-                            isParentHovering: isHovering,
-                            selection: $selection,
-                            value: value,
-                            index: index,
-                            maxIndex: children.count - 1
-                        )
-                        .foregroundStyle(isHovering && selection == value ? .primary : .secondary)
-                        .zIndex(1)
+            ProposedHeightLayout(minimumHeight: minHeight) {
+                HStack(spacing: 4) {
+                    ForEach(Array(children.enumerated()), id: \.offset) { index, child in
+                        if let value = child.id(as: V.self) {
+                            let nextValue: V? = if index < children.count - 1 {
+                                children[index + 1].id(as: V.self)
+                            } else {
+                                nil
+                            }
+                            SegmentedKnob(
+                                child: child,
+                                namespace: namespace,
+                                isParentHovering: isHovering,
+                                selection: $selection,
+                                value: value,
+                                index: index,
+                                maxIndex: children.count - 1
+                            )
+                            .foregroundStyle(selection == value ? .primary : .secondary)
+                            .zIndex(1)
 
-                        if hasDividers,
-                           child.id != children.last?.id {
-                            Divider()
-                                .frame(height: minHeight / 2)
-                                .zIndex(0)
+                            if hasDividers,
+                               child.id != children.last?.id {
+                                Divider()
+                                    .frame(height: minHeight / 2)
+                                    .opacity(selection == value || selection == nextValue ? 0 : 1)
+                                    .zIndex(0)
+                            }
                         }
                     }
                 }
+            }
+        }
+
+        struct ProposedHeightLayout: Layout {
+            let minimumHeight: CGFloat
+
+            func sizeThatFits(
+                proposal: ProposedViewSize,
+                subviews: Subviews,
+                cache _: inout ()
+            ) -> CGSize {
+                guard let subview = subviews.first else {
+                    return .zero
+                }
+
+                let proposedWidth = proposal.width.flatMap { $0.isFinite ? $0 : nil }
+                let proposedHeight = proposal.height.flatMap { $0.isFinite ? $0 : nil }
+                let size = subview.sizeThatFits(.init(
+                    width: proposedWidth,
+                    height: proposedHeight
+                ))
+
+                return .init(
+                    width: proposedWidth ?? size.width,
+                    height: max(minimumHeight, proposedHeight ?? size.height)
+                )
+            }
+
+            func placeSubviews(
+                in bounds: CGRect,
+                proposal _: ProposedViewSize,
+                subviews: Subviews,
+                cache _: inout ()
+            ) {
+                subviews.first?.place(
+                    at: bounds.origin,
+                    anchor: .topLeading,
+                    proposal: .init(bounds.size)
+                )
             }
         }
 
@@ -143,10 +194,11 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
                     }
                 } label: {
                     child
-                        .frame(maxWidth: .infinity, minHeight: minHeight - 8)
-                        .padding(.horizontal, 8)
+                        .frame(maxWidth: .infinity, minHeight: minHeight - 8, maxHeight: .infinity)
+                        .padding(.horizontal, 12)
                 }
                 .buttonStyle(.borderless)
+                .frame(minHeight: minHeight - 8, maxHeight: .infinity)
                 .onHover { isHovering = $0 }
                 .background {
                     Group {
@@ -162,7 +214,7 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
                     }
                 }
                 .padding(.vertical, 4)
-                .frame(minHeight: minHeight)
+                .frame(minHeight: minHeight, maxHeight: .infinity)
             }
 
             private var constrainedCornerRadii: RectangleCornerRadii {
@@ -181,24 +233,8 @@ public struct LuminareCompactPicker<Content, V>: View where Content: View, V: Ha
             }
 
             private func knob() -> some View {
-                Group {
-                    if isParentHovering {
-                        Rectangle()
-                            .foregroundStyle(.background.opacity(0.8))
-                    } else {
-                        // The `.blendMode()` prevents `.quinary` style to be clipped
-                        Rectangle()
-                            .foregroundStyle(.quinary.blendMode(.luminosity))
-                    }
-                }
-                .overlay {
-                    if isHovering {
-                        Rectangle()
-                            .foregroundStyle(.background.opacity(0.2))
-                            .blendMode(.luminosity)
-                    }
-                }
-                .clipShape(.rect(cornerRadii: constrainedCornerRadii))
+                UnevenRoundedRectangle(cornerRadii: constrainedCornerRadii)
+                    .foregroundStyle(isHovering ? .quaternary : .quinary)
             }
         }
     }
@@ -213,7 +249,7 @@ private struct PickerPreview<V>: View where V: Hashable & Equatable {
     var body: some View {
         LuminareCompactPicker(selection: $selection) {
             ForEach(elements, id: \.self) { element in
-                Text("\(element)")
+                Text(verbatim: "\(element)")
             }
         }
     }
@@ -225,12 +261,6 @@ private struct PickerPreview<V>: View where V: Hashable & Equatable {
     traits: .sizeThatFitsLayout
 ) {
     LuminareSection {
-        LuminareCompose("Button") {
-            Button {} label: {
-                Text("42")
-            }
-        }
-
         LuminareCompose("Pick from a menu") {
             PickerPreview(elements: Array(0 ..< 200), selection: 42)
         }

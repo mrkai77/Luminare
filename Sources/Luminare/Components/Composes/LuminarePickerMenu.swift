@@ -10,18 +10,18 @@ import SwiftUI
 // MARK: - Picker Menu (Compose)
 
 public struct LuminarePickerMenu<Label, Option, Item>: View
-where Label: View, Option: View, Item: Hashable {
+    where Label: View, Option: View, Item: Hashable {
     @Environment(\.luminareSectionHorizontalPadding) private var horizontalPadding
-    
+
     // MARK: Fields
-    
+
     @ViewBuilder private var label: () -> Label
     @Binding private var selection: Item
     let items: [Item]
     @ViewBuilder private var itemToView: (Item) -> Option
-    
+
     // MARK: Initializers
-    
+
     public init(
         selection: Binding<Item>,
         items: [Item],
@@ -64,31 +64,40 @@ where Label: View, Option: View, Item: Hashable {
             Text(titleKey)
         }
     }
-    
+
     // MARK: Body
-    
+
     public var body: some View {
         LuminareCompose {
-            HStack(spacing: 8) {
-                itemToView(selection)
-                
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption2)
-                    .padding(4)
-                    .luminareSurface()
-                    .luminareCornerRadius(8)
-            }
-            .overlay {
-                Picker("", selection: $selection) {
-                    ForEach(items, id: \.self) { item in
+            Menu {
+                ForEach(items, id: \.self) { item in
+                    Toggle(isOn: Binding(
+                        get: { selection == item },
+                        set: { isSelected in
+                            if isSelected {
+                                selection = item
+                            }
+                        }
+                    )) {
                         itemToView(item)
-                            .tag(item)
                     }
                 }
-                .opacity(0.001)
-                .fixedSize()
+            } label: {
+                HStack(spacing: 8) {
+                    itemToView(selection)
+
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2)
+                        .padding(4)
+                        .luminareSurface()
+                        .luminareCornerRadius(8)
+                }
                 .contentShape(.rect)
             }
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            .fixedSize()
         } label: {
             label()
         }
@@ -116,4 +125,3 @@ where Label: View, Option: View, Item: Hashable {
     }
     .frame(width: 300)
 }
-

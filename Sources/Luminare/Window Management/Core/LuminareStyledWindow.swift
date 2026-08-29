@@ -16,9 +16,10 @@ open class LuminareStyledWindow: NSWindow {
         standardWindowButton(type)
     }
 
-    private lazy var trafficLightButtonSizes: [NSButton: NSSize] = trafficLightButtons.reduce(into: [:]) { sizes, button in
-        sizes[button] = button.frame.size
-    }
+    private lazy var trafficLightButtonMetrics: [NSButton: (size: NSSize, intrinsic: NSSize)] = trafficLightButtons
+        .reduce(into: [:]) { metrics, button in
+            metrics[button] = (button.frame.size, button.intrinsicContentSize)
+        }
 
     private var trafficLightButtonConstraints: [NSLayoutConstraint] = []
     private weak var constrainedContentView: NSView?
@@ -63,7 +64,6 @@ open class LuminareStyledWindow: NSWindow {
         }
 
         relocateTrafficLightButtons()
-        scaleTrafficLightButtons()
         refreshTrafficLightTrackingAreas()
     }
 
@@ -79,6 +79,10 @@ open class LuminareStyledWindow: NSWindow {
         NSLayoutConstraint.deactivate(trafficLightButtonConstraints)
         trafficLightButtonConstraints.removeAll()
         constrainedContentView = contentView
+
+        // Opting a button out of autoresizing below replaces its frame, so the
+        // native geometry has to be captured while every button is still untouched
+        let metrics = trafficLightButtonMetrics
 
         let nativeButtonAreaWidth = (trafficLightButtons.last?.frame.minX ?? 0) - (trafficLightButtons.first?.frame.minX ?? 0)
         let buttonSpacing = titleBarButtonConfiguration.spacing > 0
@@ -100,8 +104,15 @@ open class LuminareStyledWindow: NSWindow {
                 titleBarButtonConfiguration.padding + (buttonAreaWidth - CGFloat(index) * buttonSpacing)
             }
 
-            let buttonSize = trafficLightButtonSizes[button] ?? button.frame.size
             button.translatesAutoresizingMaskIntoConstraints = false
+
+            let native = metrics[button]
+            let buttonSize: NSSize = if let native, native.intrinsic.width > 0, native.intrinsic.height > 0 {
+                native.intrinsic
+            } else {
+                native?.size ?? button.frame.size
+            }
+
             trafficLightButtonConstraints.append(contentsOf: [
                 button.topAnchor.constraint(equalTo: contentView.topAnchor, constant: titleBarButtonConfiguration.padding),
                 button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: xPosition),
@@ -109,22 +120,8 @@ open class LuminareStyledWindow: NSWindow {
                 button.heightAnchor.constraint(equalToConstant: buttonSize.height)
             ])
         }
+
         NSLayoutConstraint.activate(trafficLightButtonConstraints)
-    }
-
-    private func scaleTrafficLightButtons() {
-        for button in trafficLightButtons {
-            guard let size = trafficLightButtonSizes[button], size.width > 0, size.height > 0 else {
-                continue
-            }
-            let intrinsicSize = button.intrinsicContentSize
-
-            button.wantsLayer = true
-            button.layer?.setAffineTransform(.init(
-                scaleX: intrinsicSize.width / size.width,
-                y: intrinsicSize.height / size.height
-            ))
-        }
     }
 
     private func trafficLightButtonsAreConstrained(to contentView: NSView) -> Bool {

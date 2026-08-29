@@ -404,11 +404,6 @@ public extension View {
         environment(\.luminareSidebarOverflow, overflow)
     }
 
-    @available(*, deprecated, renamed: "luminareSidebarOverflow(_:)")
-    func luminareSizebarOverflow(_ overflow: CGFloat) -> some View {
-        luminareSidebarOverflow(overflow)
-    }
-
     // MARK: Slider
 
     func luminareSliderLayout(_ layout: LuminareSliderLayout) -> some View {

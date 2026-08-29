@@ -381,7 +381,11 @@ public struct LuminareSlider<Label, Content, V, F>: View
                 .padding(.leading, -4)
                 .fontDesign(.monospaced)
                 .onSubmit(commit)
-                .onChange(of: focusedField == .textbox) { if !$0 { commit() } }
+                .onChange(of: focusedField == .textbox) {
+                    if !$0 {
+                        commit()
+                    }
+                }
 
                 content(.init(textFieldView))
             } else {

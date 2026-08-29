@@ -421,7 +421,9 @@ public struct InfiniteScrollView: NSViewRepresentable {
                         +1
                     } else if relativeOffset <= -parent.spacing {
                         -1
-                    } else { 0 }
+                    } else {
+                        0
+                    }
 
                     accumulatePage(pageOffset)
                 }
@@ -513,7 +515,9 @@ public struct InfiniteScrollView: NSViewRepresentable {
                 parent.spacing
             } else if snapsToPrevious {
                 -parent.spacing
-            } else { 0 }
+            } else {
+                0
+            }
 
             // - Paging logic
 
@@ -523,7 +527,9 @@ public struct InfiniteScrollView: NSViewRepresentable {
                     +1
                 } else if snapsToPrevious {
                     -1
-                } else { 0 }
+                } else {
+                    0
+                }
 
                 accumulatePage(pageOffset)
             }

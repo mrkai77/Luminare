@@ -376,11 +376,15 @@ public struct LuminareListItem<Content, V>: View
         let topCornerRadii =
             if isInSelection {
                 isFirstInSelection ? itemCornerRadii : .zero
-            } else { itemCornerRadii }
+            } else {
+                itemCornerRadii
+            }
         let bottomCornerRadii =
             if isInSelection {
                 isLastInSelection ? itemCornerRadii : .zero
-            } else { itemCornerRadii }
+            } else {
+                itemCornerRadii
+            }
 
         return .init(
             topLeadingRadius: isFirst && topLeadingRounded

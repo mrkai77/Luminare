@@ -66,18 +66,17 @@ public struct LuminareSidebarTab<Tab>: View where Tab: LuminareTabItem {
                 .frame(width: minHeight, height: minHeight)
 
             Text(tab.title)
-
-            if tab.hasIndicator {
-                VStack {
-                    Circle()
-                        .foregroundStyle(.tint)
-                        .frame(width: 4, height: 4)
-                        .shadow(color: tintColor, radius: 4)
-
-                    Spacer()
+                .overlay(alignment: .topTrailing) {
+                    if tab.hasIndicator {
+                        Circle()
+                            .foregroundStyle(.tint)
+                            .frame(width: 4, height: 4)
+                            .shadow(color: tintColor, radius: 4)
+                            .offset(x: 4)
+                            .transition(.opacity.animation(animation))
+                    }
                 }
-                .transition(.opacity.animation(animation))
-            }
+                .padding(.trailing, tab.hasIndicator ? 4 : 0)
         }
     }
 

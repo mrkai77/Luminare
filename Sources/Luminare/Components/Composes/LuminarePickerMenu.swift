@@ -79,19 +79,41 @@ public struct LuminarePickerMenu<Label, Option, Item>: View
                     .luminareCornerRadius(8)
             }
             .overlay {
-                Picker("", selection: $selection) {
-                    ForEach(items, id: \.self) { item in
-                        itemToView(item)
-                            .tag(item)
+                // Hidden with AppKit's `alphaValue` rather than SwiftUI's `opacity`:
+                // on macOS 15, SwiftUI stops hit testing views below ~0.025 opacity.
+                InvisibleHost {
+                    Picker("", selection: $selection) {
+                        ForEach(items, id: \.self) { item in
+                            itemToView(item)
+                                .tag(item)
+                        }
                     }
+                    .fixedSize()
                 }
-                .opacity(0.001)
-                .fixedSize()
-                .contentShape(.rect)
             }
         } label: {
             label()
         }
+    }
+}
+
+// MARK: - Invisible Host
+
+private struct InvisibleHost<Content: View>: NSViewRepresentable {
+    @ViewBuilder let content: () -> Content
+
+    func makeNSView(context _: Context) -> NSHostingView<Content> {
+        let view = NSHostingView(rootView: content())
+        view.alphaValue = 0
+        return view
+    }
+
+    func updateNSView(_ nsView: NSHostingView<Content>, context _: Context) {
+        nsView.rootView = content()
+    }
+
+    func sizeThatFits(_: ProposedViewSize, nsView: NSHostingView<Content>, context _: Context) -> CGSize? {
+        nsView.fittingSize
     }
 }
 

@@ -64,6 +64,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
     @State private var isSliderHovering: Bool = false
     @State private var isSliderDebouncedHovering: Bool = false
     @State private var isSliderEditing: Bool = false
+    /// Where the thumb is during a drag that snaps on release, while `value` holds the nearest step.
+    @State private var trackValue: V?
     @State private var composeWidth: CGFloat = .zero
 
     private let id: UUID = .init()
@@ -349,14 +351,19 @@ public struct LuminareSlider<Label, Content, V, F>: View
 
     @ViewBuilder private func sliderView() -> some View {
         let binding = Binding<V> {
-            value
+            trackValue ?? value
         } set: { newValue in
-            let newValue = format.conformed(newValue)
+            var newValue = newValue
+            if !showSliderSteps, let sliderStep {
+                trackValue = newValue
+                newValue = newValue.snapped(to: sliderStep, in: range)
+            }
+            newValue = format.conformed(newValue)
             let didChange = newValue != value
             value = newValue
             isTextBoxVisible = false
 
-            if trackStep != nil, didChange {
+            if sliderStep != nil, didChange {
                 NSHapticFeedbackManager.defaultPerformer.perform(
                     .alignment,
                     performanceTime: .drawCompleted
@@ -477,8 +484,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
     private func handleEditingChanged(_ isEditing: Bool) {
         isSliderEditing = isEditing
 
-        if !isEditing, !showSliderSteps, let sliderStep {
-            value = format.conformed(value.snapped(to: sliderStep, in: range))
+        if !isEditing {
+            trackValue = nil
         }
 
         onEditingChanged(isEditing)

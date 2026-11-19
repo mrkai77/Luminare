@@ -52,7 +52,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
     @State private var lastValue: V
     private let range: ClosedRange<V>
     private let sliderStep: V.Stride?
-    private let showSliderSteps: Bool
+    private let showSliderTicks: Bool
     private let format: F
     private let clampsUpper: Bool, clampsLower: Bool
     private let onEditingChanged: (Bool) -> ()
@@ -76,7 +76,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
         value: Binding<V>,
         in range: ClosedRange<V>,
         sliderStep: V.Stride? = nil,
-        showSliderSteps: Bool = true,
+        showSliderTicks: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -90,7 +90,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
         self.lastValue = value.wrappedValue
         self.range = range
         self.sliderStep = sliderStep
-        self.showSliderSteps = showSliderSteps
+        self.showSliderTicks = showSliderTicks
         self.format = format
         self.clampsUpper = clampsUpper
         self.clampsLower = clampsLower
@@ -107,7 +107,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
         value: Binding<V>,
         in range: ClosedRange<V>,
         sliderStep: V.Stride? = nil,
-        showSliderSteps: Bool = true,
+        showSliderTicks: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -119,7 +119,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
             value: value,
             in: range,
             sliderStep: sliderStep,
-            showSliderSteps: showSliderSteps,
+            showSliderTicks: showSliderTicks,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -136,7 +136,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
         value: Binding<V>,
         in range: ClosedRange<V>,
         sliderStep: V.Stride? = nil,
-        showSliderSteps: Bool = true,
+        showSliderTicks: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -148,7 +148,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
             value: value,
             in: range,
             sliderStep: sliderStep,
-            showSliderSteps: showSliderSteps,
+            showSliderTicks: showSliderTicks,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -164,7 +164,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
         value: Binding<V>,
         in range: ClosedRange<V>,
         sliderStep: V.Stride? = nil,
-        showSliderSteps: Bool = true,
+        showSliderTicks: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -178,7 +178,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
             value: value,
             in: range,
             sliderStep: sliderStep,
-            showSliderSteps: showSliderSteps,
+            showSliderTicks: showSliderTicks,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -209,7 +209,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
         value: Binding<V>,
         in range: ClosedRange<V>,
         sliderStep: V.Stride? = nil,
-        showSliderSteps: Bool = true,
+        showSliderTicks: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -222,7 +222,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
             value: value,
             in: range,
             sliderStep: sliderStep,
-            showSliderSteps: showSliderSteps,
+            showSliderTicks: showSliderTicks,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -240,7 +240,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
         value: Binding<V>,
         in range: ClosedRange<V>,
         sliderStep: V.Stride? = nil,
-        showSliderSteps: Bool = true,
+        showSliderTicks: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -253,7 +253,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
             value: value,
             in: range,
             sliderStep: sliderStep,
-            showSliderSteps: showSliderSteps,
+            showSliderTicks: showSliderTicks,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -346,7 +346,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
 
     /// The step passed to the slider track, which snaps while dragging and shows tick marks.
     private var trackStep: V.Stride? {
-        showSliderSteps ? sliderStep : nil
+        showSliderTicks ? sliderStep : nil
     }
 
     @ViewBuilder private func sliderView() -> some View {
@@ -354,7 +354,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
             trackValue ?? value
         } set: { newValue in
             var newValue = newValue
-            if !showSliderSteps, let sliderStep {
+            if !showSliderTicks, let sliderStep {
                 trackValue = newValue
                 newValue = newValue.snapped(to: sliderStep, in: range)
             }
@@ -534,7 +534,7 @@ public struct LuminareSlider<Label, Content, V, F>: View
 
 // MARK: - Deprecated Initializers
 
-@available(*, deprecated, message: "Use `sliderStep:` and `showSliderSteps:` instead.")
+@available(*, deprecated, message: "Use `sliderStep:` and `showSliderTicks:` instead.")
 public extension LuminareSlider {
     init(
         value: Binding<V>,
@@ -552,7 +552,7 @@ public extension LuminareSlider {
             value: value,
             in: range,
             sliderStep: step,
-            showSliderSteps: true,
+            showSliderTicks: true,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -581,7 +581,7 @@ public extension LuminareSlider {
             value: value,
             in: range,
             sliderStep: step,
-            showSliderSteps: true,
+            showSliderTicks: true,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -608,7 +608,7 @@ public extension LuminareSlider {
             value: value,
             in: range,
             sliderStep: step,
-            showSliderSteps: true,
+            showSliderTicks: true,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -635,7 +635,7 @@ public extension LuminareSlider {
             value: value,
             in: range,
             sliderStep: step,
-            showSliderSteps: true,
+            showSliderTicks: true,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -666,7 +666,7 @@ public extension LuminareSlider {
             value: value,
             in: range,
             sliderStep: step,
-            showSliderSteps: true,
+            showSliderTicks: true,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -695,7 +695,7 @@ public extension LuminareSlider {
             value: value,
             in: range,
             sliderStep: step,
-            showSliderSteps: true,
+            showSliderTicks: true,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -786,7 +786,7 @@ extension Strideable where Stride: BinaryFloatingPoint {
             value: $value,
             in: 0...128,
             sliderStep: 1,
-            showSliderSteps: false,
+            showSliderTicks: false,
             format: .number.precision(.fractionLength(0...2)),
             prefix: Text("#")
         )

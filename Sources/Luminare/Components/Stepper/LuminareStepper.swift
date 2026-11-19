@@ -328,6 +328,8 @@ public struct LuminareStepper<V>: View where V: Strideable & BinaryFloatingPoint
                             )
                         }
                         .onChange(of: internalValue) { _, _ in
+                            // Don't echo a value that just came from the binding back into it
+                            guard value != internalValue else { return }
                             value = internalValue
                         }
                         .onChange(of: value) { _, newValue in

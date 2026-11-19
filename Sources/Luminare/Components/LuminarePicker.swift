@@ -116,6 +116,8 @@ public struct LuminarePicker<Content, V>: View where Content: View, V: Equatable
         }
         // this improves animation performance
         .onChange(of: internalSelection) { _ in
+            // Don't echo a value that just came from the binding back into it
+            guard selectedItem != internalSelection else { return }
             selectedItem = internalSelection
         }
         .onChange(of: selectedItem) { _ in

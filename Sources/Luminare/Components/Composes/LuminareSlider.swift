@@ -50,7 +50,9 @@ public struct LuminareSlider<Label, Content, V, F>: View
     @Binding private var value: V
     @State private var internalValue: V
     @State private var lastValue: V
-    private let range: ClosedRange<V>, step: V.Stride?
+    private let range: ClosedRange<V>
+    private let sliderStep: V.Stride?
+    private let showSliderSteps: Bool
     private let format: F
     private let clampsUpper: Bool, clampsLower: Bool
     private let onEditingChanged: (Bool) -> ()
@@ -71,7 +73,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
     public init(
         value: Binding<V>,
         in range: ClosedRange<V>,
-        step: V.Stride? = nil,
+        sliderStep: V.Stride? = nil,
+        showSliderSteps: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -84,7 +87,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         self.internalValue = value.wrappedValue
         self.lastValue = value.wrappedValue
         self.range = range
-        self.step = step
+        self.sliderStep = sliderStep
+        self.showSliderSteps = showSliderSteps
         self.format = format
         self.clampsUpper = clampsUpper
         self.clampsLower = clampsLower
@@ -100,7 +104,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         _ title: some StringProtocol,
         value: Binding<V>,
         in range: ClosedRange<V>,
-        step: V.Stride? = nil,
+        sliderStep: V.Stride? = nil,
+        showSliderSteps: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -111,7 +116,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         self.init(
             value: value,
             in: range,
-            step: step,
+            sliderStep: sliderStep,
+            showSliderSteps: showSliderSteps,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -127,7 +133,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         _ titleKey: LocalizedStringKey,
         value: Binding<V>,
         in range: ClosedRange<V>,
-        step: V.Stride? = nil,
+        sliderStep: V.Stride? = nil,
+        showSliderSteps: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -138,7 +145,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         self.init(
             value: value,
             in: range,
-            step: step,
+            sliderStep: sliderStep,
+            showSliderSteps: showSliderSteps,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -153,7 +161,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
     public init(
         value: Binding<V>,
         in range: ClosedRange<V>,
-        step: V.Stride? = nil,
+        sliderStep: V.Stride? = nil,
+        showSliderSteps: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -166,7 +175,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         self.init(
             value: value,
             in: range,
-            step: step,
+            sliderStep: sliderStep,
+            showSliderSteps: showSliderSteps,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -196,7 +206,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         _ title: some StringProtocol,
         value: Binding<V>,
         in range: ClosedRange<V>,
-        step: V.Stride? = nil,
+        sliderStep: V.Stride? = nil,
+        showSliderSteps: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -208,7 +219,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         self.init(
             value: value,
             in: range,
-            step: step,
+            sliderStep: sliderStep,
+            showSliderSteps: showSliderSteps,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -225,7 +237,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         _ titleKey: LocalizedStringKey,
         value: Binding<V>,
         in range: ClosedRange<V>,
-        step: V.Stride? = nil,
+        sliderStep: V.Stride? = nil,
+        showSliderSteps: Bool = true,
         format: F,
         clampsUpper: Bool = true,
         clampsLower: Bool = true,
@@ -237,7 +250,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
         self.init(
             value: value,
             in: range,
-            step: step,
+            sliderStep: sliderStep,
+            showSliderSteps: showSliderSteps,
             format: format,
             clampsUpper: clampsUpper,
             clampsLower: clampsLower,
@@ -328,15 +342,21 @@ public struct LuminareSlider<Label, Content, V, F>: View
         value > lastValue
     }
 
+    /// The step passed to the slider track, which snaps while dragging and shows tick marks.
+    private var trackStep: V.Stride? {
+        showSliderSteps ? sliderStep : nil
+    }
+
     @ViewBuilder private func sliderView() -> some View {
         let binding = Binding<V> {
             value
         } set: { newValue in
+            let newValue = format.conformed(newValue)
             let didChange = newValue != value
             value = newValue
             isTextBoxVisible = false
 
-            if step != nil, didChange {
+            if trackStep != nil, didChange {
                 NSHapticFeedbackManager.defaultPerformer.perform(
                     .alignment,
                     performanceTime: .drawCompleted
@@ -345,11 +365,11 @@ public struct LuminareSlider<Label, Content, V, F>: View
         }
 
         Group {
-            if let step {
+            if let trackStep {
                 Slider(
                     value: binding,
                     in: range,
-                    step: step
+                    step: trackStep
                 ) { isEditing in
                     handleEditingChanged(isEditing)
                 }
@@ -430,16 +450,23 @@ public struct LuminareSlider<Label, Content, V, F>: View
 
     // MARK: Functions
 
-    private func commit() {
-        if clampsLower, clampsUpper {
-            value = internalValue.clamped(to: range)
+    /// Clamps a value according to `clampsLower` and `clampsUpper`, then conforms it to `format`.
+    private func committable(_ newValue: V) -> V {
+        let clamped = if clampsLower, clampsUpper {
+            newValue.clamped(to: range)
         } else if clampsLower {
-            value = max(range.lowerBound, internalValue)
+            max(range.lowerBound, newValue)
         } else if clampsUpper {
-            value = min(range.upperBound, internalValue)
+            min(range.upperBound, newValue)
         } else {
-            value = internalValue
+            newValue
         }
+
+        return format.conformed(clamped)
+    }
+
+    private func commit() {
+        value = committable(internalValue)
         internalValue = value
 
         withAnimation(animationFast) {
@@ -449,6 +476,11 @@ public struct LuminareSlider<Label, Content, V, F>: View
 
     private func handleEditingChanged(_ isEditing: Bool) {
         isSliderEditing = isEditing
+
+        if !isEditing, !showSliderSteps, let sliderStep {
+            value = format.conformed(value.snapped(to: sliderStep, in: range))
+        }
+
         onEditingChanged(isEditing)
 
         if !isEditing {
@@ -479,25 +511,10 @@ public struct LuminareSlider<Label, Content, V, F>: View
             } else {
                 1
             }
-            let step = V(step ?? 1)
+            let step = V(sliderStep ?? 1) * acceleration
+            let direction: V = event.keyCode == upArrow ? 1 : -1
 
-            if event.keyCode == upArrow {
-                value += step * acceleration
-            }
-
-            if event.keyCode == downArrow {
-                value -= step * acceleration
-            }
-
-            if clampsLower, clampsUpper {
-                value = value.clamped(to: range)
-            } else if clampsLower {
-                value = max(range.lowerBound, value)
-            } else if clampsUpper {
-                value = min(range.upperBound, value)
-            } else {
-                value = value
-            }
+            value = committable(value + direction * step)
 
             return nil
         }
@@ -505,6 +522,199 @@ public struct LuminareSlider<Label, Content, V, F>: View
 
     func removeEventMonitor() {
         EventMonitorManager.shared.removeMonitor(for: id)
+    }
+}
+
+// MARK: - Deprecated Initializers
+
+@available(*, deprecated, message: "Use `sliderStep:` and `showSliderSteps:` instead.")
+public extension LuminareSlider {
+    init(
+        value: Binding<V>,
+        in range: ClosedRange<V>,
+        step: V.Stride?,
+        format: F,
+        clampsUpper: Bool = true,
+        clampsLower: Bool = true,
+        onEditingChanged: @escaping (Bool) -> () = { _ in },
+        onEditingCommit: @escaping () -> () = {},
+        @ViewBuilder content: @escaping (AnyView) -> Content,
+        @ViewBuilder label: @escaping () -> Label
+    ) {
+        self.init(
+            value: value,
+            in: range,
+            sliderStep: step,
+            showSliderSteps: true,
+            format: format,
+            clampsUpper: clampsUpper,
+            clampsLower: clampsLower,
+            onEditingChanged: onEditingChanged,
+            onEditingCommit: onEditingCommit,
+            content: content,
+            label: label
+        )
+    }
+
+    @_disfavoredOverload
+    init(
+        _ title: some StringProtocol,
+        value: Binding<V>,
+        in range: ClosedRange<V>,
+        step: V.Stride?,
+        format: F,
+        clampsUpper: Bool = true,
+        clampsLower: Bool = true,
+        onEditingChanged: @escaping (Bool) -> () = { _ in },
+        onEditingCommit: @escaping () -> () = {},
+        @ViewBuilder content: @escaping (AnyView) -> Content
+    ) where Label == Text {
+        self.init(
+            title,
+            value: value,
+            in: range,
+            sliderStep: step,
+            showSliderSteps: true,
+            format: format,
+            clampsUpper: clampsUpper,
+            clampsLower: clampsLower,
+            onEditingChanged: onEditingChanged,
+            onEditingCommit: onEditingCommit,
+            content: content
+        )
+    }
+
+    init(
+        _ titleKey: LocalizedStringKey,
+        value: Binding<V>,
+        in range: ClosedRange<V>,
+        step: V.Stride?,
+        format: F,
+        clampsUpper: Bool = true,
+        clampsLower: Bool = true,
+        onEditingChanged: @escaping (Bool) -> () = { _ in },
+        onEditingCommit: @escaping () -> () = {},
+        @ViewBuilder content: @escaping (AnyView) -> Content
+    ) where Label == Text {
+        self.init(
+            titleKey,
+            value: value,
+            in: range,
+            sliderStep: step,
+            showSliderSteps: true,
+            format: format,
+            clampsUpper: clampsUpper,
+            clampsLower: clampsLower,
+            onEditingChanged: onEditingChanged,
+            onEditingCommit: onEditingCommit,
+            content: content
+        )
+    }
+
+    init(
+        value: Binding<V>,
+        in range: ClosedRange<V>,
+        step: V.Stride?,
+        format: F,
+        clampsUpper: Bool = true,
+        clampsLower: Bool = true,
+        prefix: Text? = nil,
+        suffix: Text? = nil,
+        onEditingChanged: @escaping (Bool) -> () = { _ in },
+        onEditingCommit: @escaping () -> () = {},
+        @ViewBuilder label: @escaping () -> Label
+    ) where Content == HStack<TupleView<(Text?, AnyView, Text?)>> {
+        self.init(
+            value: value,
+            in: range,
+            sliderStep: step,
+            showSliderSteps: true,
+            format: format,
+            clampsUpper: clampsUpper,
+            clampsLower: clampsLower,
+            prefix: prefix,
+            suffix: suffix,
+            onEditingChanged: onEditingChanged,
+            onEditingCommit: onEditingCommit,
+            label: label
+        )
+    }
+
+    @_disfavoredOverload
+    init(
+        _ title: some StringProtocol,
+        value: Binding<V>,
+        in range: ClosedRange<V>,
+        step: V.Stride?,
+        format: F,
+        clampsUpper: Bool = true,
+        clampsLower: Bool = true,
+        prefix: Text? = nil,
+        suffix: Text? = nil,
+        onEditingChanged: @escaping (Bool) -> () = { _ in },
+        onEditingCommit: @escaping () -> () = {}
+    ) where Label == Text, Content == HStack<TupleView<(Text?, AnyView, Text?)>> {
+        self.init(
+            title,
+            value: value,
+            in: range,
+            sliderStep: step,
+            showSliderSteps: true,
+            format: format,
+            clampsUpper: clampsUpper,
+            clampsLower: clampsLower,
+            prefix: prefix,
+            suffix: suffix,
+            onEditingChanged: onEditingChanged,
+            onEditingCommit: onEditingCommit
+        )
+    }
+
+    init(
+        _ titleKey: LocalizedStringKey,
+        value: Binding<V>,
+        in range: ClosedRange<V>,
+        step: V.Stride?,
+        format: F,
+        clampsUpper: Bool = true,
+        clampsLower: Bool = true,
+        prefix: Text? = nil,
+        suffix: Text? = nil,
+        onEditingChanged: @escaping (Bool) -> () = { _ in },
+        onEditingCommit: @escaping () -> () = {}
+    ) where Label == Text, Content == HStack<TupleView<(Text?, AnyView, Text?)>> {
+        self.init(
+            titleKey,
+            value: value,
+            in: range,
+            sliderStep: step,
+            showSliderSteps: true,
+            format: format,
+            clampsUpper: clampsUpper,
+            clampsLower: clampsLower,
+            prefix: prefix,
+            suffix: suffix,
+            onEditingChanged: onEditingChanged,
+            onEditingCommit: onEditingCommit
+        )
+    }
+}
+
+// MARK: - Value Conformance
+
+extension ParseableFormatStyle where FormatOutput == String {
+    /// Formats a value and parses it back, so it carries exactly the precision the format displays.
+    /// Falls back to the original value if it can't be parsed.
+    func conformed(_ value: FormatInput) -> FormatInput {
+        (try? parseStrategy.parse(format(value))) ?? value
+    }
+}
+
+extension Strideable where Stride: BinaryFloatingPoint {
+    /// Snaps the value to the nearest multiple of `step` from the range's lower bound, staying within the range.
+    func snapped(to step: Stride, in range: ClosedRange<Self>) -> Self {
+        let steps = (range.lowerBound.distance(to: self) / step).rounded()
+        return range.lowerBound.advanced(by: steps * step).clamped(to: range)
     }
 }
 
@@ -554,6 +764,26 @@ public struct LuminareSlider<Label, Content, V, F>: View
                         .padding()
                 }
         }
+
+        LuminareSlider(
+            "Stepped with ticks",
+            value: $value,
+            in: 0...128,
+            sliderStep: 8,
+            format: .number.precision(.fractionLength(0...2)),
+            prefix: Text("#")
+        )
+
+        LuminareSlider(
+            "Snaps to whole numbers on release",
+            value: $value,
+            in: 0...128,
+            sliderStep: 1,
+            showSliderSteps: false,
+            format: .number.precision(.fractionLength(0...2)),
+            prefix: Text("#")
+        )
+        .luminareSliderLayout(.compact(textBoxWidth: 100))
 
         LuminareSlider(
             "With a sliding textbox",

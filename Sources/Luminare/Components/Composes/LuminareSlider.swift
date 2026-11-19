@@ -363,7 +363,8 @@ public struct LuminareSlider<Label, Content, V, F>: View
             value = newValue
             isTextBoxVisible = false
 
-            if sliderStep != nil, didChange {
+            // Only ticks give a visible step to feel
+            if trackStep != nil, didChange {
                 NSHapticFeedbackManager.defaultPerformer.perform(
                     .alignment,
                     performanceTime: .drawCompleted

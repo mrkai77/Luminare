@@ -128,7 +128,8 @@ public struct LuminareList<ContentA, ContentB, V, ID>: View
                 .frame(height: fixedHeight.map { min(totalHeight, $0) }, alignment: .top)
             }
         }
-        .animation(animation, value: items)
+        // Only adding, removing and reordering rows animate; edits to a row's contents update in place
+        .animation(animation, value: items.map { $0[keyPath: keyPath] })
         .onChange(of: luminareClickedOutside) { _ in
             setSelection([])
         }

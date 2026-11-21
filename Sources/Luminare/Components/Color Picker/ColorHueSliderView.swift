@@ -25,6 +25,7 @@ struct ColorHueSliderView: View {
     @State private var selectionPosition: CGFloat = 0
     @State private var selectionOffset: CGFloat = 0
     @State private var selectionWidth: CGFloat = 0
+    @State private var isAtEdge: Bool = false
 
     /// gradient for the color spectrum slider
     private let colorSpectrumGradient: Gradient = .init(
@@ -108,18 +109,17 @@ struct ColorHueSliderView: View {
     // MARK: Functions
 
     private func handleDragChange(_ value: DragGesture.Value, _ viewSize: CGFloat) {
-        let lastPercentage = selectionPosition / viewSize
-
         let clampedX = max(5.5, min(value.location.x, viewSize - 5.5))
         selectionPosition = clampedX
         let percentage = selectionPosition / viewSize
 
-        let edgeTarget = 5.5 / viewSize
-        let isAtEdge = abs(percentage - edgeTarget) == 0 || abs(percentage - (1 - edgeTarget)) == 0
-
-        if percentage != lastPercentage, isAtEdge {
+        // Only play haptics when the handle first reaches an edge.
+        // The hue round-trips through RGB, so comparing positions would fire again as it settles.
+        let reachedEdge = value.location.x <= 5.5 || value.location.x >= viewSize - 5.5
+        if reachedEdge, !isAtEdge {
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
         }
+        isAtEdge = reachedEdge
 
         withAnimation(animation) {
             selectedColor.hue = percentage

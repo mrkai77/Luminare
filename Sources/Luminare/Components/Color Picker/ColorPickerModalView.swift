@@ -157,7 +157,7 @@ struct ColorPickerModalView: View {
             }
 
             RGBInputField(value: $greenComponent) {
-                Text("Blue")
+                Text("Green")
             } color: { value in
                 .init(
                     red: redComponent / 255.0,
@@ -167,7 +167,7 @@ struct ColorPickerModalView: View {
             }
 
             RGBInputField(value: $blueComponent) {
-                Text("Green")
+                Text("Blue")
             } color: { value in
                 .init(
                     red: redComponent / 255.0,

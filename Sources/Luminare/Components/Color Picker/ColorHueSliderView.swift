@@ -19,10 +19,11 @@ struct ColorHueSliderView: View {
     @Binding var selectedColor: HSBColor
     var roundedTop: Bool = false
     var roundedBottom: Bool = false
+    /// Corner radius of the rounded corners of the container that clips this slider.
+    var containerCornerRadius: CGFloat = 8
 
     @State private var selectionPosition: CGFloat = 0
     @State private var selectionOffset: CGFloat = 0
-    @State private var selectionCornerRadius: CGFloat = 0
     @State private var selectionWidth: CGFloat = 0
 
     /// gradient for the color spectrum slider
@@ -42,16 +43,16 @@ struct ColorHueSliderView: View {
                     endPoint: .trailing
                 )
 
-                let leadingCornerRadius = selectionOffset < (geo.size.width / 2) ? selectionCornerRadius : 2
-                let trailingCornerRadius = selectionOffset > (geo.size.width / 2) ? selectionCornerRadius : 2
+                let leadingGap = selectionOffset
+                let trailingGap = geo.size.width - selectionOffset - selectionWidth
 
                 UnevenRoundedRectangle(
-                    topLeadingRadius: roundedTop ? leadingCornerRadius : 2,
-                    bottomLeadingRadius: roundedBottom ? leadingCornerRadius : 2,
-                    bottomTrailingRadius: roundedBottom ? trailingCornerRadius : 2,
-                    topTrailingRadius: roundedTop ? trailingCornerRadius : 2
+                    topLeadingRadius: handleCornerRadius(horizontalGap: leadingGap, verticalGap: handleTopGap, rounded: roundedTop),
+                    bottomLeadingRadius: handleCornerRadius(horizontalGap: leadingGap, verticalGap: handleBottomGap, rounded: roundedBottom),
+                    bottomTrailingRadius: handleCornerRadius(horizontalGap: trailingGap, verticalGap: handleBottomGap, rounded: roundedBottom),
+                    topTrailingRadius: handleCornerRadius(horizontalGap: trailingGap, verticalGap: handleTopGap, rounded: roundedTop)
                 )
-                .frame(width: selectionWidth, height: 12.5)
+                .frame(width: selectionWidth, height: handleHeight)
                 .padding(.bottom, 0.5)
                 .offset(x: selectionOffset, y: 0)
                 .foregroundColor(.white)
@@ -63,7 +64,6 @@ struct ColorHueSliderView: View {
                             geo.size.width
                         )
                         selectionWidth = handleWidth(at: position, geo.size.width)
-                        selectionCornerRadius = handleCornerRadius(at: position, geo.size.width)
                     }
                 }
             }
@@ -80,13 +80,29 @@ struct ColorHueSliderView: View {
                     geo.size.width
                 )
                 selectionWidth = handleWidth(at: selectionPosition, geo.size.width)
-                selectionCornerRadius = handleCornerRadius(at: selectionPosition, geo.size.width)
             }
             .onChange(of: selectedColor) { color in
                 selectionPosition = color.hue * geo.size.width
             }
         }
-        .frame(height: 16)
+        .frame(height: sliderHeight)
+    }
+
+    // MARK: Handle Geometry
+
+    private let sliderHeight: CGFloat = 16
+    private let handleHeight: CGFloat = 12.5
+    private let handleBottomPadding: CGFloat = 0.5
+    private let handleBaseCornerRadius: CGFloat = 2
+
+    /// Gap between the top of the handle and the top of the slider.
+    private var handleTopGap: CGFloat {
+        (sliderHeight - handleHeight - handleBottomPadding) / 2
+    }
+
+    /// Gap between the bottom of the handle and the bottom of the slider.
+    private var handleBottomGap: CGFloat {
+        handleTopGap + handleBottomPadding
     }
 
     // MARK: Functions
@@ -122,10 +138,19 @@ struct ColorHueSliderView: View {
         return max(5, min(15, 5 + (6 * edgeFactor)))
     }
 
-    private func handleCornerRadius(at position: CGFloat, _ viewSize: CGFloat) -> CGFloat {
-        let edgeDistance = min(position, viewSize - position)
-        let edgeFactor = max(0, min(edgeDistance / 5, 1))
-        return 15 * edgeFactor
+    /// Blends a handle corner from its base radius towards the container's corner radius as it approaches that corner.
+    ///
+    /// This exactly matches how macOS rounds window corners as they approach the rounded display corners of PROLED MacBooks:
+    /// `t = min(1 - dx / R, 1 - dy / R)`, and the corner radius becomes `r + t * (R - r)` when `t > 0`,
+    /// where `R` is the container's corner radius, `r` is the handle's base radius, and `dx`/`dy` are the gaps between the handle and the container's edges.
+    private func handleCornerRadius(horizontalGap: CGFloat, verticalGap: CGFloat, rounded: Bool) -> CGFloat {
+        let containerRadius = rounded ? containerCornerRadius : handleBaseCornerRadius
+        guard containerRadius > handleBaseCornerRadius else { return handleBaseCornerRadius }
+
+        let progress = min(1 - max(horizontalGap, 0) / containerRadius, 1 - max(verticalGap, 0) / containerRadius)
+        guard progress > 0 else { return handleBaseCornerRadius }
+
+        return handleBaseCornerRadius + progress * (containerRadius - handleBaseCornerRadius)
     }
 }
 

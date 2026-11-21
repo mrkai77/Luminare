@@ -34,6 +34,27 @@ struct ColorPickerModalView: View {
 
     private let colorSampler: NSColorSampler = .init()
 
+    // MARK: Initializers
+
+    init(
+        selectedColor: Binding<Color>,
+        hexColor: Binding<String>,
+        hasColorPicker: Bool = true
+    ) {
+        self._selectedColor = selectedColor
+        self._hexColor = hexColor
+        self.hasColorPicker = hasColorPicker
+
+        // Start from the current color, so that nothing animates in from black when the picker opens
+        let color = selectedColor.wrappedValue
+        let components = color.components
+        self._initialColor = State(initialValue: color)
+        self._redComponent = State(initialValue: components.red * 255.0)
+        self._greenComponent = State(initialValue: components.green * 255.0)
+        self._blueComponent = State(initialValue: components.blue * 255.0)
+        self._hueFallback = State(initialValue: color.hsb.hue)
+    }
+
     // MARK: Body
 
     var body: some View {

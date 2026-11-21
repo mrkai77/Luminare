@@ -11,7 +11,8 @@ public extension EnvironmentValues {
     // MARK: Modal
 
     @Entry var luminareModalStyle: LuminareModalStyle = .sheet
-    @Entry var luminareModalCornerRadius: CGFloat = 12
+    /// The corner radius of sheet modals. When `nil`, sheets use the system's window corner radius.
+    @Entry var luminareModalCornerRadius: CGFloat? = nil
     @Entry var luminareModalPresentation: LuminareModalPresentation = .windowCenter
     @Entry var luminareModalClosesOnDefocus: Bool = false
     @Entry var luminareIsInsideModal: Bool = false

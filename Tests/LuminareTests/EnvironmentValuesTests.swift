@@ -7,7 +7,7 @@ struct EnvironmentValuesTests {
     @Test func defaultsRemainStable() {
         let values = EnvironmentValues()
 
-        #expect(values.luminareModalCornerRadius == 12)
+        #expect(values.luminareModalCornerRadius == nil)
         #expect(values.luminareModalClosesOnDefocus == false)
         #expect(values.luminareTitleBarHeight == 50)
         #expect(values.luminareSidebarOverflow == 50)

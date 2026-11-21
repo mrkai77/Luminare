@@ -50,21 +50,38 @@ struct LuminareModalModifier<ModalContent>: ViewModifier
 
     private func presentSheet() {
         guard panelController?.window == nil else { return }
-        let panel = LuminareWindow(
-            _internalConfiguration: (),
-            titleBarButtonConfiguration: nil,
-            cornerRadius: modalCornerRadius,
-            canBecomeMain: false,
-            closesOnDefocus: modalClosesOnDefocus,
-            initialOrigin: { modalPresentation.origin(of: $0) },
-            onClose: {
-                isPresented = false
-            }
-        ) {
+        let modalContent = {
             LuminareModalView {
                 content()
                     .luminareTint(overridingWith: tintColor)
             }
+        }
+        let initialOrigin: (CGRect) -> CGPoint = { modalPresentation.origin(of: $0) }
+        let onClose = { isPresented = false }
+
+        // Only override the corner radius when one is specified,
+        // so that macOS can otherwise adjust it, such as to match a display's rounded corners
+        let panel: LuminareWindow = if let modalCornerRadius {
+            LuminareCustomCornerRadiusWindow(
+                _internalConfiguration: (),
+                cornerRadius: modalCornerRadius,
+                titleBarButtonConfiguration: nil,
+                canBecomeMain: false,
+                closesOnDefocus: modalClosesOnDefocus,
+                initialOrigin: initialOrigin,
+                onClose: onClose,
+                content: modalContent
+            )
+        } else {
+            LuminareWindow(
+                _internalConfiguration: (),
+                titleBarButtonConfiguration: nil,
+                canBecomeMain: false,
+                closesOnDefocus: modalClosesOnDefocus,
+                initialOrigin: initialOrigin,
+                onClose: onClose,
+                content: modalContent
+            )
         }
         panel.level = .floating
         panel.collectionBehavior.formUnion(.fullScreenAuxiliary)

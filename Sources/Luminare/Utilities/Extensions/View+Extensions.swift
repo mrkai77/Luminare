@@ -195,7 +195,10 @@ public extension View {
         environment(\.luminareModalStyle, style)
     }
 
-    func luminareModalCornerRadius(_ radius: CGFloat) -> some View {
+    /// Sets the corner radius of sheet modals.
+    ///
+    /// When `nil`, sheets use the system's window corner radius, which macOS can adjust, such as to match a display's rounded corners.
+    func luminareModalCornerRadius(_ radius: CGFloat?) -> some View {
         environment(\.luminareModalCornerRadius, radius)
     }
 

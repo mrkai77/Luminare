@@ -16,15 +16,21 @@ public class LuminareWindow: LuminareStyledWindow {
     private let onClose: (() -> ())?
     private var hasPositionedWindow = false
 
+    /// Initializes a ``LuminareWindow`` that uses the system's window corner radius.
+    ///
+    /// Because the corner radius isn't overridden, macOS can still adjust it, such as rounding the window's corners to match a display's rounded corners.
+    /// To use a specific corner radius instead, use ``LuminareCustomCornerRadiusWindow``.
+    ///
+    /// - Parameters:
+    ///   - titleBarButtonConfiguration: The titlebar button padding and spacing.
+    ///   - content: the content view of the window, wrapped in a ``LuminareView``.
     public convenience init(
         titleBarButtonConfiguration: LuminareTitleBarButtonConfiguration? = .default,
-        cornerRadius: CGFloat = LuminareStyledWindow.defaultCornerRadius,
         content: @escaping () -> some View
     ) {
         self.init(
             _internalConfiguration: (),
             titleBarButtonConfiguration: titleBarButtonConfiguration,
-            cornerRadius: cornerRadius,
             content: content
         )
     }
@@ -33,7 +39,6 @@ public class LuminareWindow: LuminareStyledWindow {
     ///
     /// - Parameters:
     ///   - titleBarButtonConfiguration: The titlebar button padding and spacing.
-    ///   - cornerRadius: The window corner radius.
     ///   - level: The AppKit window level.
     ///   - canBecomeMain: Whether the window can become the main window.
     ///   - closesOnDefocus: Whether the window closes when it resigns key status.
@@ -44,7 +49,6 @@ public class LuminareWindow: LuminareStyledWindow {
     init(
         _internalConfiguration _: () = (),
         titleBarButtonConfiguration: LuminareTitleBarButtonConfiguration? = .default,
-        cornerRadius: CGFloat = LuminareStyledWindow.defaultCornerRadius,
         canBecomeMain: Bool = true,
         closesOnDefocus: Bool = false,
         initialOrigin: ((CGRect) -> CGPoint)? = nil,
@@ -72,7 +76,6 @@ public class LuminareWindow: LuminareStyledWindow {
         let view = LuminareWindowHostingContainerView(hostedView: luminareView)
 
         self.titleBarButtonConfiguration = titleBarButtonConfiguration
-        luminareCornerRadius = cornerRadius
         alphaValue = 0
         contentView = view
         contentView?.wantsLayer = true

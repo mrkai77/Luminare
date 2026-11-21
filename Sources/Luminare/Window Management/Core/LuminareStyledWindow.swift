@@ -31,25 +31,9 @@ open class LuminareStyledWindow: NSWindow {
         }
     }
 
-    public var luminareCornerRadius: CGFloat = LuminareStyledWindow.defaultCornerRadius
-
     override open func layoutIfNeeded() {
         super.layoutIfNeeded()
         relocateTrafficLights()
-    }
-
-    @objc dynamic var _cornerRadius: CGFloat {
-        luminareCornerRadius
-    }
-
-    public static var defaultCornerRadius: CGFloat {
-        if #available(macOS 27, *) {
-            16
-        } else if #available(macOS 26, *) {
-            24
-        } else {
-            12
-        }
     }
 
     func relocateTrafficLights() {

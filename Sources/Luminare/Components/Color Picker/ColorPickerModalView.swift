@@ -111,6 +111,11 @@ struct ColorPickerModalView: View {
             updateComponents(color)
         }
         .onChange(of: internalHSBColor) { newValue in
+            // Remember the hue here rather than in `internalHSBColor`, as that's read during view updates
+            if newValue.saturation != 0, newValue.brightness != 0 {
+                hueFallback = newValue.hue
+            }
+
             selectedColor = newValue.rgb
         }
         .animation(animationFast, value: internalHSBColor)
@@ -131,7 +136,6 @@ struct ColorPickerModalView: View {
                 brightness: hsb.brightness
             )
         } else {
-            hueFallback = hsb.hue
             return hsb
         }
     }

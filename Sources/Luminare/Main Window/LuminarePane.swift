@@ -76,6 +76,7 @@ public struct LuminarePane<Header, Content>: View where Header: View, Content: V
             wrappedHeader
 
             Divider()
+                .zIndex(-1)
 
             content()
         }

@@ -180,10 +180,8 @@ public struct LuminareToolTipModifier<ToolTipContent>: ViewModifier where ToolTi
             let stage = event.stage
             isPopoverPresented = true
 
-            if stage == 1 {
-                if !forceTouchRecognized {
-                    forceTouchProgress = event.pressure
-                }
+            if stage == 1, !forceTouchRecognized {
+                forceTouchProgress = event.pressure
             }
 
             if stage == 2 {

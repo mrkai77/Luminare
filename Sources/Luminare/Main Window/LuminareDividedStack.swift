@@ -89,6 +89,7 @@ struct LuminareDividedHStackVariadic: View {
                 if child.id != children.last?.id {
                     Divider()
                         .edgesIgnoringSafeArea(.top)
+                        .zIndex(-1) // Lets content that grows past its bounds, such as a pressed glass button, draw over the divider
                 }
             }
             .transition(.asymmetric(insertion: .identity, removal: .opacity.animation(.easeInOut(duration: 0.25))))
@@ -108,6 +109,7 @@ struct LuminareDividedVStackVariadic: View {
 
                 if child.id != children.last?.id {
                     Divider()
+                        .zIndex(-1) // Lets content that grows past its bounds, such as a pressed glass button, draw over the divider
                 }
             }
             .transition(.asymmetric(insertion: .identity, removal: .opacity.animation(.easeInOut(duration: 0.25))))

@@ -19,5 +19,6 @@ struct LuminareWindowMeasuredContentView<Content>: View where Content: View {
                 .frame(minWidth: 12, minHeight: 12, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .luminareBackground()
     }
 }

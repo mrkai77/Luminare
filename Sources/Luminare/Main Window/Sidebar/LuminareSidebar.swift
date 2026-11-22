@@ -61,7 +61,6 @@ public struct LuminareSidebar<Content>: View where Content: View {
             }
             .padding(.vertical, -overflow)
         }
-        .luminareBackground()
     }
 }
 

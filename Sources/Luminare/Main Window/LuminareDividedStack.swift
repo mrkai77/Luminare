@@ -89,7 +89,6 @@ struct LuminareDividedHStackVariadic: View {
                 if child.id != children.last?.id {
                     Divider()
                         .edgesIgnoringSafeArea(.top)
-                        .luminareBackground()
                 }
             }
             .transition(.asymmetric(insertion: .identity, removal: .opacity.animation(.easeInOut(duration: 0.25))))
@@ -109,7 +108,6 @@ struct LuminareDividedVStackVariadic: View {
 
                 if child.id != children.last?.id {
                     Divider()
-                        .luminareBackground()
                 }
             }
             .transition(.asymmetric(insertion: .identity, removal: .opacity.animation(.easeInOut(duration: 0.25))))

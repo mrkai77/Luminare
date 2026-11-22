@@ -14,16 +14,6 @@ struct LuminareModalView<Content>: View where Content: View {
         content()
             .environment(\.luminareIsInsideModal, true)
             .buttonStyle(.luminare)
-            .background {
-                backgroundWindow()
-            }
             .frame(minWidth: 12, minHeight: 12, alignment: .top)
-    }
-
-    func backgroundWindow() -> some View {
-        VisualEffectView(
-            material: .fullScreenUI,
-            blendingMode: .behindWindow
-        )
     }
 }

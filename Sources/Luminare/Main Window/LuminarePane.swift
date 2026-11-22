@@ -80,7 +80,6 @@ public struct LuminarePane<Header, Content>: View where Header: View, Content: V
             content()
         }
         .luminareListFixedHeight(until: .infinity)
-        .luminareBackground()
     }
 
     private var wrappedHeader: some View {

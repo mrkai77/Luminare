@@ -75,12 +75,11 @@ struct ColorHueSliderView: View {
                     }
             )
             .onAppear {
-                selectionPosition = selectedColor.hue * geo.size.width
-                selectionOffset = calculateOffset(
-                    handleWidth: handleWidth(at: selectionPosition, geo.size.width),
-                    geo.size.width
-                )
-                selectionWidth = handleWidth(at: selectionPosition, geo.size.width)
+                snapSelection(to: selectedColor.hue, width: geo.size.width)
+            }
+            .onChange(of: geo.size.width) { width in
+                // The slider can be resized after it appears, such as while its window sizes itself to fit
+                snapSelection(to: selectedColor.hue, width: width)
             }
             .onChange(of: selectedColor) { color in
                 selectionPosition = color.hue * geo.size.width
@@ -124,6 +123,13 @@ struct ColorHueSliderView: View {
         withAnimation(animation) {
             selectedColor.hue = percentage
         }
+    }
+
+    /// Places the handle at a hue without animating, for when the slider's width changes.
+    private func snapSelection(to hue: Double, width: CGFloat) {
+        selectionPosition = hue * width
+        selectionWidth = handleWidth(at: selectionPosition, width)
+        selectionOffset = calculateOffset(handleWidth: selectionWidth, width)
     }
 
     private func calculateOffset(handleWidth: CGFloat, _ viewSize: CGFloat) -> CGFloat {

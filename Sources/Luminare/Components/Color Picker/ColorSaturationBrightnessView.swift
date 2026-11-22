@@ -75,6 +75,12 @@ struct ColorSaturationBrightnessView: View {
             .onAppear {
                 updateCirclePositionFromColor(geo.size)
             }
+            .onChange(of: geo.size) { size in
+                // The view can be resized after it appears, such as while its window sizes itself to fit
+                if !isDragging {
+                    updateCirclePositionFromColor(size)
+                }
+            }
             .onChange(of: selectedColor) { _ in
                 if !isDragging {
                     updateCirclePositionFromColor(geo.size)

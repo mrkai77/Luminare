@@ -79,6 +79,7 @@ struct ColorPickerModalView: View {
                         )
                     )
                     .scaledToFill()
+                    .zIndex(1) // Lets the selection circle overlap the hue slider when it's at the bottom edge
 
                     ColorHueSliderView(selectedColor: color, roundedBottom: true)
                         .scaledToFill()
